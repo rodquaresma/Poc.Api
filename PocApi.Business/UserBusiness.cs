@@ -5,6 +5,11 @@ namespace PocApi.Business
 {
     public class UserBusiness : IUserBusiness
     {
+        public Task<bool> Delete(int id)
+        {
+            throw new NotImplementedException();
+        }
+
         public Task<UserDTO> GetByEmail(string email)
         {
             throw new NotImplementedException();
@@ -15,9 +20,9 @@ namespace PocApi.Business
             throw new NotImplementedException();
         }
 
-        public Task<UserDTO> Update(UserDTO userDTO)
+        public Task<bool> Update(UserDTO userDTO)
         {
-            throw new NotImplementedException();
+            throw new NotImplementedException("Chegamos na business!!!");
         }
     }
 }

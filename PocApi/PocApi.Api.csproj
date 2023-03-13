@@ -11,6 +11,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\PocApi.Business\PocApi.Business.csproj" />
+    <ProjectReference Include="..\PocApi.Data\PocApi.Data.csproj" />
     <ProjectReference Include="..\PocApi.DTOs\PocApi.DTOs.csproj" />
     <ProjectReference Include="..\PocApi.Services\PocApi.Services.csproj" />
   </ItemGroup>

@@ -6,4 +6,14 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Folder Include="Context\" />
+    <Folder Include="EntityConfiguration\" />
+    <Folder Include="UnityOfWork\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\PocApi.Entities\PocApi.Entities.csproj" />
+  </ItemGroup>
+
 </Project>

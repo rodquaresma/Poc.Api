@@ -6,6 +6,7 @@ namespace PocApi.Business.Interfaces
     {
         Task<UserDTO> GetByEmail (string email);
         Task<int> Insert(UserDTO userDTO);
-        Task<UserDTO> Update(UserDTO userDTO);
+        Task<bool> Update(UserDTO userDTO);
+        Task<bool> Delete(int id);
     }
 }

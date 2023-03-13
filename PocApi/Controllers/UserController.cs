@@ -20,7 +20,7 @@ namespace PocApi.Api.Controllers
         
         public async Task<IActionResult> Update([FromBody] UserDTO userDTO)
         {
-            ServiceResponseDTO<UserDTO> serviceResponseDTO = await _userService.Update(userDTO);
+            ServiceResponseDTO<bool> serviceResponseDTO = await _userService.Update(userDTO);
             return Ok(serviceResponseDTO);
         }
 

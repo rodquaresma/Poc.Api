@@ -6,4 +6,8 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\PocApi.Shared\PocApi.Shared.csproj" />
+  </ItemGroup>
+
 </Project>
