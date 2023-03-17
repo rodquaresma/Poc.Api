@@ -1,7 +1,10 @@
-﻿using PocApi.Business;
+﻿using Microsoft.EntityFrameworkCore;
+using PocApi.Business;
 using PocApi.Business.Interfaces;
+using PocApi.Data.Context;
 using PocApi.Data.Interfaces;
 using PocApi.Data.Repositories;
+using PocApi.Data.UnityOfWork;
 using PocApi.Services;
 using PocApi.Services.Interfaces;
 
@@ -28,6 +31,29 @@ namespace PocApi.Api
             services.AddScoped<IUserRepository, UserRepository>();
 
             return services;
+        }
+
+        public static IServiceCollection AddUnitOfWork(this IServiceCollection services)
+        {
+            services.AddScoped<IUnityOfWork, UnityOfWork>();
+
+            return services;
+        }
+
+        public static IServiceCollection AddDataBase(this IServiceCollection services, IConfiguration configuration)
+        {
+            services.AddDbContext<AppDbContext>(x => x.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
+
+            return services;
+        }
+
+        public static void CreateDataBaseIfNotExist(this WebApplication webApplication)
+        {
+            using (IServiceScope _scope = webApplication.Services.CreateScope())
+            {
+                AppDbContext appDbContext = _scope.ServiceProvider.GetRequiredService<AppDbContext>();
+                appDbContext.Database.EnsureCreated();
+            }
         }
     }
 }
