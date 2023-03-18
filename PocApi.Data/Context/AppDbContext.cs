@@ -6,17 +6,17 @@ namespace PocApi.Data.Context
 {
     public class AppDbContext : DbContext
     {
-        public AppDbContext(DbContextOptions dbContextOptions) : base(dbContextOptions) 
+        public AppDbContext(DbContextOptions dbContextOptions) : base(dbContextOptions)
         {
 
         }
 
-        //protected override void OnModelCreating (ModelBuilder modelBuilder)
-        //{
-        //    base.OnModelCreating(modelBuilder);
-        //    modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppContext).Assembly);
-        //}
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+            modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppContext).Assembly);
+        }
 
-        public List<User> Users { get; set; } = default!;
+        public DbSet<User> Users { get; set; } = default!;
     }
 }
