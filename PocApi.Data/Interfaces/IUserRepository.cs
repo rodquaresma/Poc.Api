@@ -12,5 +12,6 @@ namespace PocApi.Data.Interfaces
         Task<int> Insert(User user);
         Task<bool> Update(User user);
         Task<User> GetById(int id);
+        Task<User> GetByEmail(string email);
     }
 }

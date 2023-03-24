@@ -10,11 +10,13 @@ using PocApi.Services.Interfaces;
 
 namespace PocApi.Api
 {
+    
     public static class ServicesExtensions
     {
         public static IServiceCollection AddServices(this IServiceCollection services)
         {
             services.AddScoped<IUserService, UserService>();
+            services.AddScoped<IAuthService, AuthService>();
 
             return services;
         }
@@ -49,11 +51,11 @@ namespace PocApi.Api
 
         public static void CreateDataBaseIfNotExist(this WebApplication webApplication)
         {
-            using (IServiceScope _scope = webApplication.Services.CreateScope())
-            {
-                AppDbContext appDbContext = _scope.ServiceProvider.GetRequiredService<AppDbContext>();
-                appDbContext.Database.EnsureCreated();
-            }
+            //using (IServiceScope _scope = webApplication.Services.CreateScope())
+            //{
+            //    AppDbContext appDbContext = _scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            //    appDbContext.Database.EnsureCreated();
+            //}
         }
     }
 }

@@ -1,4 +1,6 @@
-﻿using PocApi.Data.Interfaces;
+﻿using Microsoft.EntityFrameworkCore;
+using PocApi.Data.Context;
+using PocApi.Data.Interfaces;
 using PocApi.Entities;
 using System;
 using System.Collections.Generic;
@@ -10,19 +12,43 @@ namespace PocApi.Data.Repositories
 {
     public class UserRepository : IUserRepository
     {
-        public Task<User> GetById(int id)
+        private readonly AppDbContext _appDbContext;
+        public UserRepository(AppDbContext appDbContext)
         {
-            throw new NotImplementedException();
+            _appDbContext = appDbContext;
         }
 
-        public Task<int> Insert(User user)
+        public async Task<User> GetById(int id)
         {
-            throw new NotImplementedException();
+            User user = await _appDbContext.Set<User>().FirstOrDefaultAsync(user => user.Id == id);
+
+            return user;
         }
 
-        public Task<bool> Update(User user)
+        public async Task<User> GetByEmail(string email)
         {
-            throw new NotImplementedException();
+            User user = await _appDbContext.Set<User>().FirstOrDefaultAsync(user => user.Email == email);
+
+            return user;
         }
+
+        public async Task<int> Insert(User user)
+        {
+            await _appDbContext.Set<User>().AddAsync(user);
+            await _appDbContext.SaveChangesAsync();
+
+            return user.Id;
+        }
+
+        public async Task<bool> Update(User user)
+        {
+            _appDbContext.Set<User>().Update(user);
+            await _appDbContext.SaveChangesAsync();
+
+            return true;
+        }
+
+
+
     }
 }

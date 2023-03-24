@@ -1,13 +1,15 @@
 ﻿using PocApi.Business.Interfaces;
+using PocApi.Data.Interfaces;
 using PocApi.Data.Repositories;
 using PocApi.DTOs;
+using PocApi.Entities;
 
 namespace PocApi.Business
 {
     public class UserBusiness : IUserBusiness
     {
-        private readonly UserRepository _userRepository;
-        public UserBusiness(UserRepository userRepository)
+        private readonly IUserRepository _userRepository;
+        public UserBusiness(IUserRepository userRepository)
         {
             _userRepository = userRepository;
         }
@@ -16,9 +18,22 @@ namespace PocApi.Business
             throw new NotImplementedException();
         }
 
-        public Task<UserDTO> GetByEmail(string email)
+        public async Task<UserDTO> GetByEmail(string email)
         {
-            throw new NotImplementedException();
+            User user = await _userRepository.GetByEmail(email);
+
+            if (user == null)
+            {
+                return null;
+            }
+
+            return new UserDTO
+            {
+                Id = user.Id,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                Email = email
+            };
         }
 
         public Task<int> Insert(UserDTO userDTO)
