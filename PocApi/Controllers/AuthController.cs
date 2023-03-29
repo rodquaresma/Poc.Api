@@ -23,6 +23,15 @@ namespace PocApi.Api.Controllers
             ServiceResponseDTO<string> serviceResponseDTO = await _authService.Login(userLoginDTO);
 
             return Ok(serviceResponseDTO);
-        } 
+        }
+
+        [HttpPost]
+        [Route(nameof(Register))]
+        public async Task<IActionResult> Register([FromBody] UserToInsertDTO userToInsertDTO)
+        {
+            ServiceResponseDTO<UserToInsertDTO> serviceResponseDTO = await _authService.Register(userToInsertDTO);
+
+            return Ok(serviceResponseDTO);
+        }
     }
 }

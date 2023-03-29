@@ -1,8 +1,10 @@
-﻿using PocApi.Business.Interfaces;
+﻿using AutoMapper;
+using PocApi.Business.Interfaces;
 using PocApi.Data.UnityOfWork;
 using PocApi.DTOs;
 using PocApi.Services.Interfaces;
 using PocApi.Shared.Messages;
+using PocApi.Shared.PasswordUtility;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,11 +17,13 @@ namespace PocApi.Services
     {
         private readonly IUserBusiness _userBusiness;
         private readonly IUnityOfWork _unityOfWork;
-        public AuthService(IUserBusiness userBusiness, IUnityOfWork unityOfWork)
+        private readonly IMapper _mapper;
+        public AuthService(IUserBusiness userBusiness, IUnityOfWork unityOfWork, IMapper mapper)
         {
             _userBusiness = userBusiness;
             _unityOfWork = unityOfWork;
-        }     
+            _mapper = mapper;
+        }
 
 
         public async Task<ServiceResponseDTO<string>> Login(UserLoginDTO userLoginDTO)
@@ -48,9 +52,36 @@ namespace PocApi.Services
             return serviceResponseDTO;
         }
 
-        public Task<ServiceResponseDTO<UserDTO>> Register(UserDTO userDTO)
+        public async Task<ServiceResponseDTO<UserToInsertDTO>> Register(UserToInsertDTO userToInsertDTO)
         {
-            throw new NotImplementedException();
+            ServiceResponseDTO<UserToInsertDTO> serviceResponseDTO = new ServiceResponseDTO<UserToInsertDTO>();
+
+            try
+            {
+                UserDTO userOnDatabase = await _userBusiness.GetByEmail(userToInsertDTO.Email);
+
+                if (userOnDatabase != null)
+                {
+                    serviceResponseDTO.IsSucess = false;
+                    serviceResponseDTO.Message = ConstantMessages.UserNotFound(userToInsertDTO.Email);
+                }
+
+                UserDTO userDTO = _mapper.Map<UserDTO>(userToInsertDTO);
+                PasswordHashUtility.CreateHash(userToInsertDTO.Password, out byte[] passwordHash, out byte[] passwordSalt);
+                userDTO.PasswordHash = passwordHash;
+                userDTO.PasswordSalt = passwordSalt;
+                userDTO.Id = await _userBusiness.Insert(userDTO);
+                await _unityOfWork.CommitAsync();
+                serviceResponseDTO.Data = _mapper.Map<UserToInsertDTO>(userDTO);
+                
+            }
+            catch (Exception ex)
+            {
+                serviceResponseDTO.IsSucess = false;
+                serviceResponseDTO.Message = ConstantMessages.FailureMessage(ex.GetBaseException().Message);
+            }
+
+            return serviceResponseDTO;
         }
     }
 }
