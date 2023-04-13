@@ -18,5 +18,7 @@ namespace PocApi.Data.Context
         }
 
         public DbSet<User> Users { get; set; } = default!;
+        public DbSet<Order> Orders { get; set; } = default!;
+
     }
 }

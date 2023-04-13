@@ -51,11 +51,12 @@ namespace PocApi.Api
 
         public static void CreateDataBaseIfNotExist(this WebApplication webApplication)
         {
-            //using (IServiceScope _scope = webApplication.Services.CreateScope())
-            //{
-            //    AppDbContext appDbContext = _scope.ServiceProvider.GetRequiredService<AppDbContext>();
-            //    appDbContext.Database.EnsureCreated();
-            //}
+            using (IServiceScope _scope = webApplication.Services.CreateScope())
+            {
+                AppDbContext appDbContext = _scope.ServiceProvider.GetRequiredService<AppDbContext>();
+                appDbContext.Database.EnsureCreated();
+
+            }
         }
     }
 }

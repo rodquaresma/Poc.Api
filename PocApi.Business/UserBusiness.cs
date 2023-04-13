@@ -3,6 +3,7 @@ using PocApi.Business.Interfaces;
 using PocApi.Data.Interfaces;
 using PocApi.Data.Repositories;
 using PocApi.DTOs;
+using PocApi.DTOs.Filters;
 using PocApi.Entities;
 
 namespace PocApi.Business
@@ -16,9 +17,27 @@ namespace PocApi.Business
             _userRepository = userRepository;
             _mapper = mapper;
         }
-        public Task<bool> Delete(int id)
+        public async Task<bool> Delete(int id)
         {
-            throw new NotImplementedException();
+            User user = await _userRepository.GetById(id);
+
+            if (user == null)
+            {
+                return false;
+            }
+
+            user.IsActive = false;
+            user.UpdatedAt = DateTime.Now;
+            return await _userRepository.Update(user);
+
+        }
+
+        public async Task<List<UserDTO>> GetAll(UserFilterDTO userFilterDTO)
+        {
+            List<User> users = await _userRepository.GetAll(userFilterDTO);
+            List<UserDTO> userDTOs = _mapper.Map<List<UserDTO>>(users);
+
+            return userDTOs;
         }
 
         public async Task<UserDTO> GetByEmail(string email)
@@ -35,9 +54,10 @@ namespace PocApi.Business
             return await _userRepository.Insert(user);
         }
 
-        public Task<bool> Update(UserDTO userDTO)
+        public async Task<bool> Update(UserDTO userDTO)
         {
-            throw new NotImplementedException("Chegamos na business!!!");
+            User user = _mapper.Map<User>(userDTO);
+            return await _userRepository.Update(user);
         }
     }
 }

@@ -1,4 +1,6 @@
 ﻿using AutoMapper;
+using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Tokens;
 using PocApi.Business.Interfaces;
 using PocApi.Data.UnityOfWork;
 using PocApi.DTOs;
@@ -7,7 +9,9 @@ using PocApi.Shared.Messages;
 using PocApi.Shared.PasswordUtility;
 using System;
 using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
+using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -18,11 +22,13 @@ namespace PocApi.Services
         private readonly IUserBusiness _userBusiness;
         private readonly IUnityOfWork _unityOfWork;
         private readonly IMapper _mapper;
-        public AuthService(IUserBusiness userBusiness, IUnityOfWork unityOfWork, IMapper mapper)
+        private readonly IConfiguration _configuration;
+        public AuthService(IUserBusiness userBusiness, IUnityOfWork unityOfWork, IMapper mapper, IConfiguration configuration)
         {
             _userBusiness = userBusiness;
             _unityOfWork = unityOfWork;
             _mapper = mapper;
+            _configuration = configuration;
         }
 
 
@@ -33,15 +39,22 @@ namespace PocApi.Services
             {
                 UserDTO _userDTO = await _userBusiness.GetByEmail(userLoginDTO.Email);
 
-                if (_userDTO != null)
+                if (_userDTO == null || _userDTO.Id == 0)
                 {
-                    serviceResponseDTO.Data = "Login efetuado";
-                }
-                else
-                {
-                    serviceResponseDTO.Data = "Usuário não encontrado";
+                    serviceResponseDTO.Data = ConstantMessages.UserNotFound(userLoginDTO.Email);
+
+                    return serviceResponseDTO;
                 }
 
+                else if (!PasswordHashUtility.CheckHash(userLoginDTO.Password, _userDTO.PasswordHash, _userDTO.PasswordSalt))
+                {
+                    serviceResponseDTO.Data = ConstantMessages.WrongPassword;
+
+                    return serviceResponseDTO;
+                }
+
+                string token = CreateToken(_userDTO);
+                serviceResponseDTO.Data = token;
             }
             catch (Exception ex)
             {
@@ -73,7 +86,7 @@ namespace PocApi.Services
                 userDTO.Id = await _userBusiness.Insert(userDTO);
                 await _unityOfWork.CommitAsync();
                 serviceResponseDTO.Data = _mapper.Map<UserToInsertDTO>(userDTO);
-                
+
             }
             catch (Exception ex)
             {
@@ -82,6 +95,30 @@ namespace PocApi.Services
             }
 
             return serviceResponseDTO;
+        }
+
+        private string CreateToken(UserDTO userDTO)
+        {
+            List<Claim> claims = new List<Claim>()
+            {
+                new Claim(ClaimTypes.NameIdentifier, userDTO.Id.ToString()),
+                new Claim(ClaimTypes.Name, userDTO.Email)
+            };
+
+            SymmetricSecurityKey symmetricSecurityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration.GetSection("AppSettings:Token").Value));
+            SigningCredentials signingCredentials = new SigningCredentials(symmetricSecurityKey, SecurityAlgorithms.HmacSha512Signature);
+
+            SecurityTokenDescriptor securityTokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(claims),
+                Expires = DateTime.Now.AddDays(7),
+                SigningCredentials = signingCredentials
+            };
+
+            JwtSecurityTokenHandler jwtSecurityTokenHandler = new JwtSecurityTokenHandler();
+            SecurityToken securityToken = jwtSecurityTokenHandler.CreateToken(securityTokenDescriptor);
+
+            return jwtSecurityTokenHandler.WriteToken(securityToken);
         }
     }
 }

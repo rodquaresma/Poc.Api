@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using PocApi.DTOs;
+using PocApi.DTOs.Filters;
 using PocApi.Services.Interfaces;
 
 namespace PocApi.Api.Controllers
@@ -30,6 +31,15 @@ namespace PocApi.Api.Controllers
         public async Task<IActionResult> Delete([FromBody] UserDTO userDTO)
         {
             ServiceResponseDTO<bool> serviceResponseDTO = await _userService.Delete(userDTO);
+            return Ok(serviceResponseDTO);
+        }
+
+        [HttpGet]
+        [Route(nameof(GetAll))]
+
+        public async Task<IActionResult> GetAll([FromQuery] UserFilterDTO userFilterDTO)
+        {
+            ServiceResponseDTO<List<UserDTO>> serviceResponseDTO = await _userService.GetAll(userFilterDTO);
             return Ok(serviceResponseDTO);
         }
     }
